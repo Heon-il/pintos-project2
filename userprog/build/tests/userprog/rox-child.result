@@ -1,2 +1,2 @@
 FAIL
-run: write "child-rox": FAILED
+run: try to write "child-rox": FAILED
