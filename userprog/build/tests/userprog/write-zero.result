@@ -1,0 +1,2 @@
+FAIL
+run: write() returned 69484544 instead of 0: FAILED
