@@ -488,8 +488,8 @@ load (const char *file_name, struct intr_frame *if_) {
 	}
 
 	/* Deny writes to running exec */
-	// t->running = file;
-	// file_deny_write(file); // 
+	t->running = file;
+	file_deny_write(file); // 
 	
 
 	/* Read and verify executable header. */
@@ -614,7 +614,7 @@ load (const char *file_name, struct intr_frame *if_) {
 done:
 	/* We arrive here whether the load is successful or not. */
 	free(fn_copy);
-	file_close (file);
+	// file_close (file);
 	return success;
 }
 

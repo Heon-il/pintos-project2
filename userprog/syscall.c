@@ -234,6 +234,7 @@ int read(int fd, void *buffer, unsigned size)
 	if(fileobj==NULL)
 		return -1;
 
+	
 	if(fileobj == STDIN){
 		// extra - 0,1 file descriptor도 닫을 수 있게
 		if(cur->stdin_count ==0){
@@ -260,8 +261,9 @@ int read(int fd, void *buffer, unsigned size)
 		lock_acquire(&file_rw_lock);
 		ret = file_read(fileobj, buffer, size);
 		lock_release(&file_rw_lock);
+		
 	}
-
+	
 	return ret;
 }
 
@@ -275,6 +277,7 @@ int write(int fd, const void *buffer, unsigned size)
 		return -1;
 	
 	struct thread *cur = thread_current();
+	
 	if (fileobj==STDOUT){
 		if(cur->stdout_count == 0){
 			NOT_REACHED();
@@ -294,8 +297,8 @@ int write(int fd, const void *buffer, unsigned size)
 		lock_acquire(&file_rw_lock);
 		ret = file_write(fileobj, buffer, size);
 		lock_release(&file_rw_lock);
-
 	}
+	
 	return ret;
 }
 
@@ -308,7 +311,7 @@ void close(int fd){
 	// extra
 	if (fd ==0 || fileobj ==STDIN)
 		cur->stdin_count--;
-	else if(fd==1| fileobj == STDOUT)
+	else if(fd==1 || fileobj == STDOUT)
 		cur->stdout_count--;
 	
 	remove_file_from_fdt(fd);
@@ -356,6 +359,10 @@ int dup2(int oldfd, int newfd){
 		cur->stdout_count++;
 	else
 		fileobj->dupCount++;
+	
+	close(newfd);
+	fdt[newfd] = fileobj;
+	return newfd;
 }
 
 
