@@ -200,6 +200,23 @@ thread_create (const char *name, int priority,
 	init_thread (t, name, priority);
 	tid = t->tid = allocate_tid ();
 
+
+	/* Parent - Child  */
+	struct thread *cur = thread_current();
+	list_push_back(&cur->child_list, &t->child_elem);
+
+	/* File Descriptor */
+	t->fdTable = palloc_get_multiple(PAL_ZERO, FDT_PAGES);
+	if(t->fdTable == NULL)
+		return TID_ERROR;
+	t->fdIdx = 2; // 0:stdin, 1: stdout
+	t->fdTable[0] = 1;
+	t->fdTable[1] = 2;
+
+	// For Extra
+	t->stdin_count = 1;
+	t->stdout_count = 1;
+
 	/* Call the kernel_thread if it scheduled.
 	 * Note) rdi is 1st argument, and rsi is 2nd argument. */
 	t->tf.rip = (uintptr_t) kernel_thread;
@@ -427,6 +444,15 @@ init_thread (struct thread *t, const char *name, int priority) {
 	t->init_priority = priority;
 	t->wait_on_lock = NULL;
 	list_init(&t->donations);
+
+	/* system call */
+	list_init(&t->child_list);
+	sema_init(&t->wait_sema, 0);
+	sema_init(&t->fork_sema, 0);
+	sema_init(&t->free_sema, 0);
+	
+	/* deny exec writes */
+	t->running = NULL;
 }
 
 /* Chooses and returns the next thread to be scheduled.  Should

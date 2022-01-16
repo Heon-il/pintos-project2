@@ -102,6 +102,8 @@ struct thread {
 	struct list donations;
 	struct list_elem donation_elem;
 
+	
+
 #ifdef USERPROG
 	/* Owned by userprog/process.c. */
 	uint64_t *pml4;                     /* Page map level 4 */
@@ -114,6 +116,34 @@ struct thread {
 	/* Owned by thread.c. */
 	struct intr_frame tf;               /* Information for switching */
 	unsigned magic;                     /* Detects stack overflow. */
+
+	/* $begin For System Call */
+	
+
+	/* Parent-child hierachy */
+	struct list child_list;
+	struct list_elem child_elem;
+
+	/* wait syscall */
+	struct semaphore wait_sema;
+	int exit_status;
+
+	/* fork syscall */
+	struct intr_frame parent_if; // parent_intr_frame
+	struct semaphore fork_sema; // parent wait
+	struct semaphore free_sema; // Postpone child termination 
+
+	/* file descriptor */
+	struct file **fdTable; // allocation in thread_create(thread.c)
+	int fdIdx; // an index of an open spot in fdTable
+
+	/* deny exec writes*/
+	struct file *running; //executable ran by cuurent process
+
+	/* Extra*/
+	int stdin_count;
+	int stdout_count;
+
 };
 
 /* If false (default), use round-robin scheduler.
@@ -166,5 +196,9 @@ void donate_priority(void);
 void remove_with_lock(struct lock *lock);
 void refresh_priority(void);
 bool thread_compare_donate_priority(const struct list_elem *l, const struct list_elem *s, void *aux UNUSED);
+
+// syscall - fork
+#define FDT_PAGES 3 // page to allocate for file descriptor tables(thread_create, process_exit)
+#define FDCOUNT_LIMIT FDT_PAGES*(1<<9) // LIMIT fdIdx
 
 #endif /* threads/thread.h */

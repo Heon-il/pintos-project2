@@ -3,4 +3,7 @@
 
 void syscall_init (void);
 
+
+/****************** System Call Implementations ********************/
+
 #endif /* userprog/syscall.h */
