@@ -342,13 +342,14 @@ unsigned tell(int fd)
 }
 
 int dup2(int oldfd, int newfd){
-	if(oldfd == newfd){
-		return newfd;
-	}
-
 	struct file *fileobj = find_file_by_fd(oldfd);
 	if(fileobj == NULL)
 		return -1;
+	
+	// 위에서 여기로 옮김. edge test case
+	if(oldfd == newfd){
+		return newfd;
+	}
 	
 	struct thread *cur = thread_current();
 	struct file **fdt = cur->fdTable;
